@@ -93,6 +93,21 @@
             overflow-y: none;
         }
 
+        /* Subtítulos */
+        #subtitles {
+            width: 48%; /* Ajustado para que se alinee junto al video */
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: left;
+            font-size: 16px;
+            margin-top: 20px;
+            height: auto;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
         /* Botones redondos */
         .btn-round {
             width: 60px;
@@ -119,42 +134,37 @@
         .btn-detection { background: #ffaa00; color: white; }
         .btn-detection.off { background: #6c757d; }
 
-/* Estilos adicionales para la barra flotante */
-.btn-container {
-    display: flex; /* Siempre visible en pantallas grandes */
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
-    background: rgba(0, 0, 0, 0.7);
-    border-radius: 30px;
-    padding: 10px;
-    box-shadow: 0px 0px 20px rgba(0, 195, 255, 0.5);
-    transition: opacity 0.3s ease-in-out;
-}
+        /* Estilos adicionales para la barra flotante */
+        .btn-container {
+            display: flex; /* Siempre visible en pantallas grandes */
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 30px;
+            padding: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 195, 255, 0.5);
+            transition: opacity 0.3s ease-in-out;
+        }
 
-/* Responsivo para dispositivos móviles */
-@media (max-width: 768px) {
-    /* Inicialmente oculto en móviles */
-    .btn-container {
-        display: none;
-    }
-
-    .btn-container.show {
-        display: flex;
-    }
-}
-
-
-
-        /* Estilos responsivos */
+        /* Responsivo para dispositivos móviles */
         @media (max-width: 768px) {
+            /* Inicialmente oculto en móviles */
+            .btn-container {
+                display: none;
+            }
+
+            .btn-container.show {
+                display: flex;
+            }
+
             h1 {
                 font-size: 1.4rem;
             }
 
-            .text-box {
+            .text-box, #subtitles {
                 width: 90%;
                 height: 50%;
                 max-width: 320px;
@@ -176,7 +186,7 @@
             }
 
             /* Video y cuadro de texto se apilan en móvil */
-            #video-container, .text-box {
+            #video-container, .text-box, #subtitles {
                 width: 100%;
                 max-width: 100%;
             }
@@ -202,6 +212,12 @@
                 <strong>Información detectada:</strong><br>
                 (Aquí aparecerán los datos cuando se procese la imagen)
             </div>
+
+            <!-- Área de subtítulos -->
+            <div id="subtitles">
+                <strong>Subtítulos:</strong><br>
+                <span id="subtitle-text"></span>
+            </div>
         </div>
         <div class="btn-container">
             <button id="btnCamera" class="btn-round btn-camera" onclick="toggleCamera()">
@@ -221,20 +237,37 @@
         const video = document.getElementById('video-stream');
         const processedFrame = document.getElementById('processed-frame');
         const textBox = document.getElementById('text-box');
+        const subtitleText = document.getElementById('subtitle-text');
         const btnCamera = document.getElementById('btnCamera');
         const btnMic = document.getElementById('btnMic');
         const btnDetection = document.getElementById('btnDetection');
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
 
+        recognition.lang = 'es-ES';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onresult = (event) => {
+            let finalTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript + ' ';
+                }
+            }
+            document.getElementById('subtitle-text').innerText = finalTranscript;
+        };
+
+        recognition.start();
         let stream = null;
         let isStreaming = false;
-        let isAudioOn = true;
+        let isAudioOn = false;
         let isDetectionOn = true;
 
         async function startCamera() {
             try {
                 stream = await navigator.mediaDevices.getUserMedia({
                     video: { width: 640, height: 480 },
-                    audio: true
+                    audio: false
                 });
                 video.srcObject = stream;
                 isStreaming = true;
@@ -296,33 +329,32 @@
         }
 
         let isButtonContainerVisible = false;
-let hideTimeout;
+        let hideTimeout;
 
-function toggleButtonContainer() {
-    const btnContainer = document.querySelector('.btn-container');
-    
-    if (!isButtonContainerVisible) {
-        // Mostrar los botones solo si no están visibles
-        btnContainer.classList.add('show');
-        isButtonContainerVisible = true;
-        
-        // Ocultar los botones después de 6 segundos
-        clearTimeout(hideTimeout);
-        hideTimeout = setTimeout(() => {
-            btnContainer.classList.remove('show');
-            isButtonContainerVisible = false;
-        }, 6000); // 6 segundos
-    }
-}
+        function toggleButtonContainer() {
+            const btnContainer = document.querySelector('.btn-container');
+            
+            if (!isButtonContainerVisible) {
+                // Mostrar los botones solo si no están visibles
+                btnContainer.classList.add('show');
+                isButtonContainerVisible = true;
+                
+                // Ocultar los botones después de 6 segundos
+                clearTimeout(hideTimeout);
+                hideTimeout = setTimeout(() => {
+                    btnContainer.classList.remove('show');
+                    isButtonContainerVisible = false;
+                }, 6000); // 6 segundos
+            }
+        }
 
-// Detectamos el toque en la pantalla en dispositivos móviles
-document.body.addEventListener('touchstart', toggleButtonContainer);
+        // Detectamos el toque en la pantalla en dispositivos móviles
+        document.body.addEventListener('touchstart', toggleButtonContainer);
 
-// Aseguramos que los botones no desaparezcan en pantallas de PC
-if (window.innerWidth > 768) {
-    document.querySelector('.btn-container').style.display = 'flex';
-}
-
+        // Aseguramos que los botones no desaparezcan en pantallas de PC
+        if (window.innerWidth > 768) {
+            document.querySelector('.btn-container').style.display = 'flex';
+        }
 
         function sendFrameToServer() {
             if (!isStreaming || !isDetectionOn) return;
@@ -353,7 +385,9 @@ if (window.innerWidth > 768) {
             textBox.innerHTML = `<strong>Información detectada:</strong><br>${data}`; // Muestra la información detectada
         });
 
-
+        socket.on('subtitles', (text) => {
+            subtitleText.innerText = text; // Muestra los subtítulos en tiempo real
+        });
 
         setInterval(sendFrameToServer, 100);
         startCamera();
