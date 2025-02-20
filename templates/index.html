@@ -260,55 +260,69 @@
 
         recognition.start();
 
-let stream = null;
+        let videoStream = null;
+        let audioStream = null;
         let isStreaming = false;
         let isAudioOn = false;
-        let isDetectionOn = true;
 
-        async function startCamera() {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 640, height: 480 },
-                    audio: false
-                });
-                video.srcObject = stream;
-                isStreaming = true;
-                btnCamera.classList.remove("off");
+async function startCamera() {
+    try {
+        videoStream = await navigator.mediaDevices.getUserMedia({
+            video: { width: 640, height: 480 },
+            audio: false
+        });
+        video.srcObject = videoStream;
+        isStreaming = true;
+        btnCamera.classList.remove("off");
 
-                // Ocultar el spinner de carga
-                document.getElementById('loading-spinner').style.display = 'none';
-            } catch (error) {
-                console.error('Error al acceder a la cámara:', error);
-            }
+        // Ocultar el spinner de carga
+        document.getElementById('loading-spinner').style.display = 'none';
+    } catch (error) {
+        console.error('Error al acceder a la cámara:', error);
+    }
+}
+
+function stopCamera() {
+    if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
+        isStreaming = false;
+        btnCamera.classList.add("off");
+    }
+}
+
+function toggleCamera() {
+    if (isStreaming) {
+        stopCamera();
+    } else {
+        startCamera();
+    }
+}
+
+async function toggleAudio() {
+    if (!audioStream) {
+        try {
+            audioStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            isAudioOn = true;
+        } catch (error) {
+            console.error('Error al acceder al micrófono:', error);
+            return;
         }
-
-        function stopCamera() {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                video.srcObject = null;
-                isStreaming = false;
-                btnCamera.classList.add("off");
-            }
+    } else {
+        let audioTrack = audioStream.getAudioTracks()[0];
+        if (audioTrack) {
+            audioTrack.enabled = !audioTrack.enabled;
+            isAudioOn = audioTrack.enabled;
+            if (!isAudioOn) {
+            recognition.stop();
+        }else{
+            recognition.start();
+    }
+    btnMic.classList.toggle("off", !isAudioOn);
         }
+    }
+}
 
-        function toggleCamera() {
-            if (isStreaming) {
-                stopCamera();
-            } else {
-                startCamera();
-            }
-        }
-
-        function toggleAudio() {
-            if (stream) {
-                let audioTrack = stream.getAudioTracks()[0];
-                if (audioTrack) {
-                    audioTrack.enabled = !audioTrack.enabled;
-                    isAudioOn = audioTrack.enabled;
-                    btnMic.classList.toggle("off", !isAudioOn);
-                }
-            }
-        }
 
 
         window.onload = function() {
