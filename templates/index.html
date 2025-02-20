@@ -242,72 +242,73 @@
         const btnCamera = document.getElementById('btnCamera');
         const btnMic = document.getElementById('btnMic');
         const btnDetection = document.getElementById('btnDetection');
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+recognition.continuous = true;
+recognition.interimResults = true;
 
-        recognition.lang = 'es-ES';
-        recognition.continuous = true;
-        recognition.interimResults = true;
+let stream = null;
+let isStreaming = false;
+let isAudioOn = false;
+let isDetectionOn = true;
 
-        recognition.onresult = (event) => {
-            let finalTranscript = '';
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                if (event.results[i].isFinal) {
-                    finalTranscript += event.results[i][0].transcript + ' ';
-                }
-            }
-            document.getElementById('subtitle-text').innerText = finalTranscript;
-        };
+async function startCamera() {
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: 640, height: 480 }, 
+            audio: false // Asegura que solo se active la cámara sin audio
+        });
+        video.srcObject = stream;
+        isStreaming = true;
+        btnCamera.classList.remove("off");
 
-        recognition.start();
-        let stream = null;
-        let isStreaming = false;
-        let isAudioOn = false;
-        let isDetectionOn = true;
+        // Ocultar el spinner de carga
+        document.getElementById('loading-spinner').style.display = 'none';
+    } catch (error) {
+        console.error('Error al acceder a la cámara:', error);
+    }
+}
 
-        async function startCamera() {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 640, height: 480 },
-                    audio: false
-                });
-                video.srcObject = stream;
-                isStreaming = true;
-                btnCamera.classList.remove("off");
+function stopCamera() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
+        isStreaming = false;
+        btnCamera.classList.add("off");
+    }
+}
 
-                // Ocultar el spinner de carga
-                document.getElementById('loading-spinner').style.display = 'none';
-            } catch (error) {
-                console.error('Error al acceder a la cámara:', error);
-            }
+function toggleCamera() {
+    if (isStreaming) {
+        stopCamera();
+    } else {
+        startCamera();
+    }
+}
+
+async function toggleAudio() {
+    try {
+        if (!stream) {
+            // Si no hay stream, obtener solo el audio
+            stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         }
+        
+        let audioTrack = stream.getAudioTracks()[0];
+        if (audioTrack) {
+            audioTrack.enabled = !audioTrack.enabled;
+            isAudioOn = audioTrack.enabled;
+            btnMic.classList.toggle("off", !isAudioOn);
 
-        function stopCamera() {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                video.srcObject = null;
-                isStreaming = false;
-                btnCamera.classList.add("off");
-            }
-        }
-
-        function toggleCamera() {
-            if (isStreaming) {
-                stopCamera();
+            if (isAudioOn) {
+                recognition.start();
             } else {
-                startCamera();
+                recognition.stop(); // Detiene el reconocimiento de voz cuando se desactiva el micrófono
             }
         }
+    } catch (error) {
+        console.error('Error al acceder al micrófono:', error);
+    }
+}
 
-        function toggleAudio() {
-            if (stream) {
-                let audioTrack = stream.getAudioTracks()[0];
-                if (audioTrack) {
-                    audioTrack.enabled = !audioTrack.enabled;
-                    isAudioOn = audioTrack.enabled;
-                    btnMic.classList.toggle("off", !isAudioOn);
-                }
-            }
-        }
 
         window.onload = function() {
             // Al cargar la página, mostrar la vista procesada por defecto
