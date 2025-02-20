@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template
 import cv2
 import numpy as np
@@ -65,4 +66,3 @@ def handle_frame(data):
 if __name__ == '__main__':
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.load_cert_chain(certfile='server.crt', keyfile='server.key')
-    app.run(host='0.0.0.0', port=5000, debug=True, ssl_context=context)
