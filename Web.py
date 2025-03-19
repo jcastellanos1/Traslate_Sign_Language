@@ -8,7 +8,7 @@ import base64
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")  # Habilitar WebSockets con CORS permitid
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 # Inicializar MediaPipe
 mp_hands = mp.solutions.hands
@@ -21,6 +21,11 @@ face_mesh = mp_face_mesh.FaceMesh(min_detection_confidence=0.7, min_tracking_con
 
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.6)
+
+# Mapeo de dedos a letras
+def get_letter(finger_count):
+    letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    return letters[finger_count - 1] if 1 <= finger_count <= 26 else ""
 
 @app.route('/')
 def index():
@@ -38,23 +43,37 @@ def handle_frame(data):
 
     # Detección de manos
     hand_results = hands.process(RGBframe)
+    detected_letter = ""
+    
     if hand_results.multi_hand_landmarks:
         for handLm in hand_results.multi_hand_landmarks:
             mp_draw.draw_landmarks(image, handLm, mp_hands.HAND_CONNECTIONS)
-
-    # Detección de rostro (máscara)
+            
+            # Contar dedos levantados
+            finger_count = 0
+            finger_tips = [8, 12, 16, 20]  # Índices de las puntas de los dedos
+            landmarks = handLm.landmark
+            if landmarks[4].x > landmarks[3].x:  # Pulgar
+                finger_count += 1
+            for tip in finger_tips:
+                if landmarks[tip].y < landmarks[tip - 2].y:
+                    finger_count += 1
+            
+            detected_letter = get_letter(finger_count)
+    
+    # Detección de rostro
     face_results = face_mesh.process(RGBframe)
     if face_results.multi_face_landmarks:
         for face_landmarks in face_results.multi_face_landmarks:
-            # Dibujar máscara en la cara
-            h, w, _ = image.shape
-            points = [(int(p.x * w), int(p.y * h)) for p in face_landmarks.landmark]
-            cv2.fillPoly(image, [np.array(points, np.int32)], (0, 255, 0))  # Máscara verde
-
-    # Detección de brazos (usando pose)
+            mp_draw.draw_landmarks(image, face_landmarks, mp_face_mesh.FACEMESH_CONTOURS)
+    
+    # Detección de hombros y brazos usando pose
     pose_results = pose.process(RGBframe)
     if pose_results.pose_landmarks:
         mp_draw.draw_landmarks(image, pose_results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+    
+    # Enviar la letra detectada al frontend
+    socketio.emit('detection_data', detected_letter)
 
     # Convertir la imagen procesada a base64
     _, buffer = cv2.imencode('.jpg', image)
@@ -66,4 +85,4 @@ def handle_frame(data):
 if __name__ == '__main__':
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.load_cert_chain(certfile='server.crt', keyfile='server.key')
-app.run(host='0.0.0.0', port=5000, debug=True, ssl_context=context)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True, ssl_context=context)
