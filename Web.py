@@ -8,7 +8,7 @@ import base64
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")  # Habilitar WebSockets con CORS permitid
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 # Inicializar MediaPipe
 mp_hands = mp.solutions.hands
