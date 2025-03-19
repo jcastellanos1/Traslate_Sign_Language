@@ -53,13 +53,24 @@ def handle_frame(data):
             finger_count = 0
             finger_tips = [8, 12, 16, 20]  # Índices de las puntas de los dedos
             landmarks = handLm.landmark
-            if landmarks[4].x < landmarks[3].x:  # Pulgar
+            if landmarks[4].x > landmarks[3].x:  # Pulgar
                 finger_count += 1
             for tip in finger_tips:
                 if landmarks[tip].y < landmarks[tip - 2].y:
                     finger_count += 1
             
             detected_letter = get_letter(finger_count)
+    
+    # Detección de rostro
+    face_results = face_mesh.process(RGBframe)
+    if face_results.multi_face_landmarks:
+        for face_landmarks in face_results.multi_face_landmarks:
+            mp_draw.draw_landmarks(image, face_landmarks, mp_face_mesh.FACEMESH_CONTOURS)
+    
+    # Detección de hombros y brazos usando pose
+    pose_results = pose.process(RGBframe)
+    if pose_results.pose_landmarks:
+        mp_draw.draw_landmarks(image, pose_results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
     
     # Enviar la letra detectada al frontend
     socketio.emit('detection_data', detected_letter)
