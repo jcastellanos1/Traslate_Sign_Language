@@ -94,9 +94,35 @@ socket.on('processed_frame', (data) => {
     }
 });
 
-socket.on('detection_data', (letter) => {
-    if (letter) {
-        textBox.innerHTML = `<strong>Letra detectada:</strong> ${letter}`;
+let currentLetter = null;
+let letterTimeout = null;
+
+socket.on('letter_detected', (letter) => {
+    // Si la letra detectada es diferente a la anterior, actualiza
+    if (letter !== currentLetter) {
+        currentLetter = letter;
+
+        // Mostrar la letra
+        textBox.innerHTML = `<strong>Letra detectada:</strong> <span style="font-size: 24px">${letter}</span>`;
+
+        // Decir la letra
+        const utterance = new SpeechSynthesisUtterance(letter);
+        utterance.lang = 'es-ES';
+        window.speechSynthesis.speak(utterance);
+
+        // Reiniciar temporizador para quitar letra si no se detecta otra pronto
+        if (letterTimeout) clearTimeout(letterTimeout);
+        letterTimeout = setTimeout(() => {
+            currentLetter = null;
+            textBox.innerHTML = `<strong>Letra detectada:</strong> <span style="font-size: 20px; color: gray;">(sin gesto)</span>`;
+        }, 1000); // 1 segundo sin letra nueva => limpiar
+    } else {
+        // Si es la misma letra, reinicia el timeout
+        if (letterTimeout) clearTimeout(letterTimeout);
+        letterTimeout = setTimeout(() => {
+            currentLetter = null;
+            textBox.innerHTML = `<strong>Letra detectada:</strong> <span style="font-size: 20px; color: gray;">(sin gesto)</span>`;
+        }, 1000);
     }
 });
 
