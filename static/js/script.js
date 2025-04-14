@@ -145,4 +145,27 @@ setInterval(() => {
     }
 }, 100);
 
+let controlBarTimeout;
+
+function showControls() {
+    const btnContainer = document.querySelector('.btn-container');
+
+    // Mostrar barra
+    btnContainer.classList.add('show');
+
+    // Reiniciar el temporizador
+    clearTimeout(controlBarTimeout);
+    controlBarTimeout = setTimeout(() => {
+        btnContainer.classList.remove('show');
+    }, 3000); // Oculta después de 3 segundos
+}
+
+// Detecta toques en pantalla para mostrar controles
+document.addEventListener('touchstart', () => {
+    if (window.innerWidth <= 768) { // Solo en móviles
+        showControls();
+    }
+});
+
+
 startCamera();
