@@ -120,6 +120,16 @@ h1 {
     100% { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
+@keyframes fadeDown {
+    0% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+}
+
+.btn-container.fade-out {
+    animation: fadeDown 0.3s ease forwards;
+}
+
+
 .btn-container.show {
     animation: fadeUp 0.3s ease forwards;
 }
