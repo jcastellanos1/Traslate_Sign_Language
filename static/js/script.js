@@ -145,24 +145,27 @@ setInterval(() => {
     }
 }, 100);
 
-let controlBarTimeout;
+let timeout;
 
 function showControls() {
-    const btnContainer = document.querySelector('.btn-container');
+    const container = document.querySelector('.btn-container');
+    
+    // Si estaba ocultándose, cancelamos eso
+    container.classList.remove('fade-out');
+    
+    // Mostramos
+    container.classList.add('show');
 
-    // Mostrar barra
-    btnContainer.classList.add('show');
-
-    // Reiniciar el temporizador
-    clearTimeout(controlBarTimeout);
-    controlBarTimeout = setTimeout(() => {
-        btnContainer.classList.remove('show');
-    }, 3000); // Oculta después de 3 segundos
+    // Limpiamos timeout anterior si existe
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+        container.classList.remove('show');
+        container.classList.add('fade-out'); // <- animación de salida
+    }, 3000); // Oculta tras 3 segundos
 }
 
-// Detecta toques en pantalla para mostrar controles
 document.addEventListener('touchstart', () => {
-    if (window.innerWidth <= 768) { // Solo en móviles
+    if (window.innerWidth <= 768) {
         showControls();
     }
 });
