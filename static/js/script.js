@@ -12,6 +12,63 @@ recognition.lang = 'es-ES';
 recognition.continuous = true;
 recognition.interimResults = true;
 
+
+
+const themeToggle = document.getElementById('theme-toggle');
+
+function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark-mode');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+}
+
+
+themeToggle.addEventListener('click', toggleTheme);
+
+window.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        document.body.classList.toggle('dark-mode', savedTheme === 'dark');
+    } else {
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.body.classList.add('dark-mode');
+        }
+    }
+
+    // === Micrófono ===
+
+    const micCheckbox = document.getElementById('checkbox');
+micCheckbox.addEventListener('change', function () {
+    if (micCheckbox.checked) {
+        recognition.stop();
+    } else {
+        recognition.start();
+    }
+});
+
+const detectionCheckbox = document.getElementById('checkboxDetection');
+
+// INICIALIZAR isDetectionOn correctamente aquí    
+function actualizarDeteccion() {
+    isDetectionOn = detectionCheckbox.checked;
+
+    if (isDetectionOn) {
+        processedFrame.style.display = 'block';  // Mostrar IA procesada
+        video.style.display = 'none';            // Ocultar video normal
+    } else {
+        processedFrame.style.display = 'none';   // Ocultar IA
+        video.style.display = 'block';            // Mostrar cámara normal
+       processedFrame.src = ''; // Limpiar la imagen procesada  
+    }
+}
+
+
+// Sincronizar estado inicial
+actualizarDeteccion();
+
+detectionCheckbox.addEventListener('change', actualizarDeteccion);
+});
+
+
 recognition.onresult = (event) => {
     let finalTranscript = '';
     for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -37,7 +94,7 @@ recognition.start();
 
 let videoStream = null;
 let isStreaming = false;
-let isDetectionOn = true;
+let isDetectionOn;// Variable para controlar el estado de detección
 
 async function startCamera() {
     try {
@@ -64,29 +121,17 @@ function stopCamera() {
 }
 
 function toggleCamera() {
+    const iconCamera = document.getElementById('iconCamera');
+
     if (isStreaming) {
         stopCamera();
+        iconCamera.setAttribute('name', 'videocam-outline'); // Cámara apagada
     } else {
         startCamera();
+        iconCamera.setAttribute('name', 'videocam'); // Cámara encendida
     }
 }
 
-function toggleDetection() {
-    isDetectionOn = !isDetectionOn;
-    btnDetection.classList.toggle("off", !isDetectionOn);
-    
-    if (isDetectionOn) {
-        processedFrame.style.display = 'block';
-        video.style.display = 'none';
-    } else {
-        processedFrame.style.display = 'none';
-        video.style.display = 'block';
-    }
-
-    if (!isStreaming) {
-        startCamera();
-    }
-}
 
 socket.on('processed_frame', (data) => {
     if (isDetectionOn) {
