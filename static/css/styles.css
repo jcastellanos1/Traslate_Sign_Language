@@ -1,208 +1,337 @@
 /* ========== ESTILOS GENERALES ========== */
-html, body {
+
+:root {
+    --bg-color-light: #f7f9fc;
+    --text-color-light: #111;
+    --bg-color-dark: #1e1e2f;
+    --text-color-dark: #eee;
+  
+    --accent-color: #212124;
+
+  }
+  
+  body {
     margin: 0;
     padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow-x: hidden;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background: linear-gradient(to right, #141E30, #243B55);
-    color: white;
-}
-
-/* Contenedor principal */
-.container {
-    margin-top: 20px;
-}
-
-/* Título */
-h1 {
-    font-size: 1.8rem;
-    margin-bottom: 20px;
-}
-
-/* Contenido principal */
-#content {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-color-light);
+    color: var(--text-color-light);
+    transition: background 0.3s ease, color 0.3s ease;
+    min-height: 100vh;
+  }
+  
+  body.dark-mode {
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-dark);
+  }
+  
+  .top-bar {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    gap: 20px;
+    align-items: center;
+    padding: 1rem 2rem;
+  }
+  
+  #theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    color: var(--accent-color);
+    transition: transform 0.3s ease;
+  }
+  
+  #theme-toggle:hover {
+    transform: rotate(20deg);
+  }
+  
+  h1 {
+    font-size: 1.8rem;
+  }
+  
+  .container {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+  
+  #video-section {
+    display: flex;
     flex-wrap: wrap;
-}
-
-/* Contenedor de video */
-#video-container {
+    justify-content: center;
+    gap: 2rem;
+  }
+  
+  #video-container {
     position: relative;
-    width: 48%;
-    margin: 0 auto;
-}
-
-/* Spinner */
-#loading-spinner {
+  }
+  
+  #loading-spinner {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7);
     display: flex;
-    align-items: center;
     justify-content: center;
-    z-index: 10;
-}
-
-.spinner-border {
-    width: 3rem;
-    height: 3rem;
-    border-width: 0.3em;
-    color: #00c3ff;
-}
-
-/* Video e imagen */
-#video-stream, #processed-frame {
-    width: 100%;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+  }
+  
+/* From Uiverse.io by EmmaxPlay */ 
+.spinner {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+ }
+ 
+ .spinner::before,
+ .spinner:after {
+  content: "";
+  position: absolute;
+  border-radius: inherit;
+ }
+ 
+ .spinner:before {
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(0deg, #ff00cc 0%, #333399 100%);
+  animation: spin8932 .5s infinite linear;
+ }
+ 
+ .spinner:after {
+  width: 85%;
+  height: 85%;
+  background-color: #0f0f0f;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+ }
+ 
+ @keyframes spin8932 {
+  to {
+   transform: rotate(360deg);
+  }
+ }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  #video-stream, #processed-frame {
+    width: 650px;
     height: auto;
-    max-width: 640px;
-    border-radius: 10px;
-    border: 3px solid #00c3ff;
-    box-shadow: 0px 0px 20px rgba(0, 195, 255, 0.5);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  }
+  
+  .info-box {
+    background: rgba(255,255,255,0.6);
+    border-radius: 12px;
+    padding: 1rem;
+    width: 320px;
+    backdrop-filter: blur(8px);
+    transition: background 0.3s ease;
+  }
+  
+  body.dark-mode .info-box {
+    background: rgba(0,0,0,0.5);
+  }
+  
+  .info-box h2 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+  }
+  
+  #text-box, #subtitle-text {
+    min-height: 40px;
+    font-size: 1rem;
+  }
+  
+  .btn-container {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  
+  /* From Uiverse.io by sahilxkhadka */ 
+.switch {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(60,64,67);
+  color: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Cuadro de texto */
-.text-box {
-    width: 48%;
-    background: white;
-    color: black;
-    border-radius: 10px;
-    padding: 10px;
-    text-align: left;
-    font-size: 16px;
-    height: 468px;
-    overflow-y: auto;
+.mic-on, .mic-off {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all .3s ease-in-out;
 }
 
-/* Subtítulos */
-#subtitles {
-    width: 48%;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    border-radius: 10px;
-    padding: 10px;
-    text-align: left;
-    font-size: 16px;
-    margin-top: 20px;
-    max-height: 100px;
-    overflow-y: auto;
+.mic-on {
+  z-index: 4;
 }
 
-/* ========== BOTONES ========== */
-.btn-round {
-    width: 60px;
-    height: 60px;
+.mic-off {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  opacity: 0;
+}
+
+.switch:hover {
+  background-color: rgba(60,64,67, 0.8);
+}
+
+#checkbox {
+  display: none;
+}
+
+#checkbox:checked + .switch {
+  background-color: red
+}
+
+#checkbox:checked + .switch .mic-off {
+  opacity: 1;
+}
+
+#checkbox:active + .switch {
+  scale: 1.2;
+}
+
+.btn-control ion-icon {
+  font-size: 30px;
+  color: white;
+}
+
+
+
+/* From Uiverse.io by catraco */ 
+/*------ Settings ------*/
+.container {
+  --color: #a5a5b0;
+  --size: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  font-size: var(--size);
+  user-select: none;
+  fill: var(--color);
+}
+
+.container .eye {
+  position: absolute;
+  animation: keyframes-fill .5s;
+}
+
+.container .eye-slash {
+  position: absolute;
+  animation: keyframes-fill .5s;
+  display: none;
+}
+
+/* ------ On check event ------ */
+.container input:checked ~ .eye {
+  display: none;
+}
+
+.container input:checked ~ .eye-slash {
+  display: block;
+}
+
+/* ------ Hide the default checkbox ------ */
+.container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+.btn-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  padding: 10px 20px;
+  border-radius: 30px;
+  gap: 20px;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+}
+
+.btn-bar-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
+/* ------ Animation ------ */
+@keyframes keyframes-fill {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+  .btn-control {
+    background: var(--accent-color);
+    border: none;
     border-radius: 50%;
+    width: 56px;
+    height: 56px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
-    border: none;
+    color: white;
     cursor: pointer;
-    margin: 10px;
-    transition: background 0.3s ease, transform 0.2s;
-}
-
-.btn-round:hover {
-    box-shadow: 0 0 12px rgba(0, 195, 255, 0.6);
-}
-
-@keyframes fadeUp {
-    0% { opacity: 0; transform: translateX(-50%) translateY(30px); }
-    100% { opacity: 1; transform: translateX(-50%) translateY(0); }
-}
-
-@keyframes fadeDown {
-    0% { opacity: 1; transform: translateX(-50%) translateY(0); }
-    100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
-}
-
-.btn-container.fade-out {
-    animation: fadeDown 0.3s ease forwards;
-}
-
-
-.btn-container.show {
-    animation: fadeUp 0.3s ease forwards;
-}
-
-
-
-.btn-camera { background: #00c3ff; color: white; }
-.btn-camera.off { background: #FF4C4C; }
-
-.btn-mic { background: #00c3ff; color: white; }
-.btn-mic.off { background: #FF4C4C; }
-
-.btn-detection { background: #ffaa00; color: white; }
-.btn-detection.off { background: #6c757d; }
-
-/* ========== BARRA FLOTANTE ========== */
-.btn-container {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(0);
-    z-index: 100;
-    display: flex;
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 30px;
-    padding: 10px;
-    box-shadow: 0 0 30px rgba(0, 195, 255, 0.5);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(0, 195, 255, 0.3);
-    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-}
-
-/* Aparece sólo en móviles con toque */
-@media (max-width: 768px) {
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+  
+  .btn-control:hover {
+    background: var(--accent-color-light);
+    transform: scale(1.1);
+  }
+  
+  .btn-control svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    #video-stream, #processed-frame, .info-box {
+      width: 100%;
+    }
+  
     .btn-container {
-        opacity: 0;
-        pointer-events: none;
-        transform: translateX(-50%) translateY(20px);
+      flex-wrap: wrap;
+      justify-content: center;
     }
-
-    .btn-container.show {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
-        pointer-events: auto;
-    }
-
-    h1 {
-        font-size: 1.4rem;
-    }
-
-    .text-box, #subtitles {
-        width: 90%;
-        max-width: 320px;
-        font-size: 14px;
-        height: 50%;
-        margin-top: 20px;
-    }
-
-    .btn-round {
-        width: 50px;
-        height: 50px;
-        font-size: 20px;
-    }
-
-    #content {
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-    }
-
-    #video-container, .text-box, #subtitles {
-        width: 100%;
-        max-width: 100%;
-    }
-}
+  }
