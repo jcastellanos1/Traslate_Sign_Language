@@ -145,4 +145,30 @@ setInterval(() => {
     }
 }, 100);
 
+let timeout;
+
+function showControls() {
+    const container = document.querySelector('.btn-container');
+    
+    // Si estaba ocultándose, cancelamos eso
+    container.classList.remove('fade-out');
+    
+    // Mostramos
+    container.classList.add('show');
+
+    // Limpiamos timeout anterior si existe
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+        container.classList.remove('show');
+        container.classList.add('fade-out'); // <- animación de salida
+    }, 3000); // Oculta tras 3 segundos
+}
+
+document.addEventListener('touchstart', () => {
+    if (window.innerWidth <= 768) {
+        showControls();
+    }
+});
+
+
 startCamera();
